@@ -146,6 +146,26 @@ class SonyFlake:
         sequence = self.sequence << BIT_LEN_MACHINE_ID
         return time | sequence | self.machine_id
 
+    def time_to_id(self, time, sequence) -> int:
+        """
+        Generates and returns id from decopose Time & sequence.
+
+        Raises a `TimeoutError` after the `SonyFlake` time overflows.
+        """
+        if time >= (1 << BIT_LEN_TIME):
+            raise TimeoutError("Over the time limit!")
+        time = time << (BIT_LEN_SEQUENCE + BIT_LEN_MACHINE_ID)
+        sequence = sequence << BIT_LEN_MACHINE_ID
+        return time | sequence | self.machine_id
+
+    def get_elapsed_time(self, timestamp: int) -> int:
+        """
+        Calculate elapsed time for given Timestamp
+        """
+        if len(str(timestamp)) > 10:
+            timestamp = int(str(timestamp)[:10])
+        return self.to_sonyflake_time(datetime.datetime.fromtimestamp(timestamp, UTC)) - self.start_time
+
     @staticmethod
     def sleep_time(duration: int) -> float:
         """
